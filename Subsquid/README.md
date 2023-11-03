@@ -2,7 +2,7 @@
 This is the OneClickNode Installation Script for Subsquid Validator
 # Download Script
 ```
-wget https://github.com/blacknodes/OneClickNodes/blob/main/Subsquid/setup.sh
+wget https://raw.githubusercontent.com/blacknodes/OneClickNodes/main/Subsquid/setup.sh
 ```
 # Giving Permission To The File
 ```
