@@ -148,5 +148,5 @@ sudo chmod +x setup.sh
 ```
 ./setup.sh
 ```
-## Press Enter on all the interfaces and paste your "private key" and "peer_id" accordingly where it is needed.
+## Press Enter on all the interfaces and paste your `private key` and `peer_id` accordingly where it is needed.
 ### If you pasted right details then the Node will be up successfully.
