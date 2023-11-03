@@ -1,6 +1,6 @@
 # SubsquidOneClickNode
 This is the OneClickNode Installation Script for Subsquid Validator
-# Save This Script As setup.sh
+# setup.sh Script
 ```
 #!/bin/bash
 
@@ -139,6 +139,10 @@ echo "Peer ID registered on chain."
 echo "Validator node setup initiated."
 
 echo "Validator node setup complete."
+```
+# Save The Above Script As setup.sh
+```
+sudo nano setup.sh
 ```
 # Giving Permission To The File
 ```
