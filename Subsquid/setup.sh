@@ -1,54 +1,98 @@
 #!/bin/bash
 
-# Clear the screen
-clear
+# Function to install prerequisites
+install_prerequisites() {
+    echo "Installing prerequisites: Docker, Docker Compose, Git, and Node.js..."
 
-# Install Ruby and RubyGems if not already installed
-if ! command -v gem &> /dev/null; then
-    echo "RubyGems (gem) is not installed. Installing Ruby..."
+    # Install Node.js
+    curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash -
+    sudo apt-get install -y nodejs
+
+    # Install Docker
     sudo apt-get update
-    sudo apt-get install -y ruby-full
-fi
+    sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common
+    curl -fsSL https://get.docker.com -o get-docker.sh
+    sudo sh get-docker.sh
 
-# Check for figlet and lolcat, install if they don't exist
-if ! command -v figlet &> /dev/null; then
-    echo "Installing figlet..."
-    sudo apt-get install figlet -y
-fi
+    # Install Docker Compose
+    sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+    sudo chmod +x /usr/local/bin/docker-compose
 
-if ! command -v lolcat &> /dev/null; then
-    echo "Installing lolcat..."
-    sudo gem install lolcat
-fi
+    # Install Git
+    sudo apt-get install -y git
 
-# Display animated text
-figlet "Subsquid Installation By BlackNodes" | lolcat
+    echo "Prerequisites installed."
+}
+
+# Function to display the animated text
+display_text() {
+    # Install Ruby and RubyGems if not already installed
+    if ! command -v gem &> /dev/null; then
+        echo "RubyGems (gem) is not installed. Installing Ruby..."
+        sudo apt-get update
+        sudo apt-get install -y ruby-full || { echo "Failed to install Ruby"; exit 1; }
+    fi
+
+    # Install figlet if not already installed
+    if ! command -v figlet &> /dev/null; then
+        echo "Installing figlet..."
+        sudo apt-get install -y figlet || { echo "Failed to install figlet"; exit 1; }
+    fi
+
+    # Install lolcat using gem if not already installed
+    if ! command -v lolcat &> /dev/null; then
+        echo "Installing lolcat..."
+        sudo gem install lolcat || { echo "Failed to install lolcat"; exit 1; }
+    fi
+
+    # Display the animated text
+    figlet "Subsquid Installation By BlackNodes" | lolcat
+}
 
 
+# Function to install Subsquid CLI and set up a Snapshot Squid
+install_subsquid() {
+    # ... (The content of the install_subsquid function)
+# Install Subsquid CLI
+npm install --global @subsquid/cli@latest
+
+# Verify the installation
+sqd --version
+
+# Ask the user for a unique squid name
+read -p "Enter a unique name for your squid: " squid_name
+
+# Initialize the squid with the user-defined name
+sqd init "$squid_name" -t https://github.com/subsquid-quests/snapshot-squid
+
+# Change directory to the newly created squid folder
+cd "$squid_name" || { echo "Failed to enter directory $squid_name"; exit 1; }
+
+# Ask the user for the key and save it
+echo "Please paste your snapshot.key content. It will be hidden as you paste:"
+read -rs key_content
+mkdir -p ./query-gateway/keys
+echo "$key_content" > ./query-gateway/keys/snapshot.key
+echo # New line for clean output after hidden input
+# Prepare the squid
+npm ci
+sqd build
+sqd migration:apply
+
+# Start the squid
+sqd run .
+
+}
+
+# Function to install Mirovia worker
+install_mirovia_worker() {
+    # ... (The content of the install_mirovia_worker function)
 # Configuration
 DATA_DIR="./blockdata" # The directory where the data will be stored
 
 # Prompt for the user's private key
 read -sp "Enter your wallet private key: " WALLET_PRIVATE_KEY
 echo # Newline for clean output
-
-# Install Docker if it's not already installed
-if ! command -v docker &> /dev/null; then
-    echo "Installing Docker..."
-    sudo apt-get update
-    sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common
-    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
-    sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
-    sudo apt-get update
-    sudo apt-get install -y docker-ce
-fi
-
-# Install Docker Compose if it's not already installed
-if ! command -v docker-compose &> /dev/null; then
-    echo "Installing Docker Compose..."
-    sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-    sudo chmod +x /usr/local/bin/docker-compose
-fi
 
 # Create the blockdata directory for the setup
 mkdir -p "${DATA_DIR}"
@@ -135,3 +179,40 @@ echo "Peer ID registered on chain."
 echo "Validator node setup initiated."
 
 echo "Validator node setup complete."
+}
+
+# Clear the screen
+clear
+
+# Install prerequisites before proceeding
+install_prerequisites
+
+# Display the animated text right after installing prerequisites
+display_text
+
+# Main menu for user selection
+echo "Choose an installation option:"
+echo "1 - Deploy a Snapshot Squid"
+echo "2 - Mirovia Worker Installation"
+echo "3 - Install Both"
+read -p "Enter your choice (1/2/3): " user_choice
+
+# Handle the user's choice
+case $user_choice in
+    1)
+        install_subsquid
+        ;;
+    2)
+        install_mirovia_worker
+        ;;
+    3)
+        install_subsquid
+        install_mirovia_worker
+        ;;
+    *)
+        echo "Invalid choice. Exiting."
+        exit 1
+        ;;
+esac
+
+echo "Installation process complete."
