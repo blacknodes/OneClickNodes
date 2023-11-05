@@ -12,7 +12,9 @@ sudo chmod +x setup.sh
 ```
 ./setup.sh
 ```
-![image](https://github.com/blacknodes/OneClickNodes/assets/85839823/878533d7-4d37-4fba-9714-b00a9b668667)
 
-## Press Enter on all the interfaces and paste your `private key` and `peer_id` accordingly where it is needed.
+![image](https://github.com/blacknodes/OneClickNodes/assets/85839823/d8b936b7-be69-4d92-80c2-ec28df099163)
+
+
+## Paste your `Snapshot.key` , `private key` and `peer_id` accordingly where they are needed.
 ### If you pasted right details then the Node will be up successfully.
