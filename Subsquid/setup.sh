@@ -101,9 +101,11 @@ echo "Data directory '${DATA_DIR}' created."
 # Save the run_worker.sh script
 cat > run_worker.sh << 'EOF'
 #!/usr/bin/env sh
+
 docker compose --version >/dev/null || (echo "Docker compose not installed"; exit 1)
 
-if [ ! -d "$1" ]; then
+if [ ! -d "$1" ]
+then
     echo "Provided data directory ($1) does not exist. Usage: $0 <DATA_DIR> <DOCKER_COMPOSE_ARGS>"
     exit 1
 fi
@@ -116,13 +118,13 @@ shift
 export USER_ID=$(id -u)
 export GROUP_ID=$(id -g)
 
-cat <<EOFCOMPOSE > docker-compose.yml
+cat <<EOF > docker-compose.yml
 version: "3.8"
 
 services:
 
   rpc_node:
-    image: subsquid/rpc-node:mirovia
+    image: subsquid/rpc-node:0.1.6
     environment:
       P2P_LISTEN_ADDR: /ip4/0.0.0.0/tcp/${LISTEN_PORT:-12345}
       RPC_LISTEN_ADDR: 0.0.0.0:50051
@@ -140,23 +142,30 @@ services:
     depends_on:
       rpc_node:
         condition: service_healthy
-    image: subsquid/p2p-worker:mirovia
+    image: subsquid/p2p-worker:0.1.6
     environment:
       PROXY_ADDR: rpc_node:50051
       SCHEDULER_ID: 12D3KooWQER7HEpwsvqSzqzaiV36d3Bn6DZrnwEunnzS76pgZkMU
+      LOGS_COLLECTOR_ID: 12D3KooWC3GvQVqnvPwWz23sTW8G8HVokMnox62A7mnL9wwaSujk
       AWS_ACCESS_KEY_ID: 66dfc7705583f6fd9520947ac10d7e9f
       AWS_SECRET_ACCESS_KEY: a68fdd7253232e30720a4c125f35a81bd495664a154b1643b5f5d4a4a5280a4f
       AWS_S3_ENDPOINT: https://7a28e49ec5f4a60c66f216392792ac38.r2.cloudflarestorage.com
       AWS_REGION: auto
       SENTRY_DSN: https://3d427b41736042ae85010ec2dc864f05@o1149243.ingest.sentry.io/4505589334081536
+      RPC_URL: https://arbitrum-goerli.publicnode.com/
+      MAX_GET_LOG_BLOCKS: 49000
     volumes:
       - ${DATA_DIR}:/app/data
+    ports:
+      - "${PROMETHEUS_PORT:-9090}:9090"
     user: "${USER_ID}:${GROUP_ID}"
-EOFCOMPOSE
+    deploy:
+      resources:
+        limits:
+          memory: 16G
 
 exec docker compose "$@"
 EOF
-
 # Make the run_worker.sh script executable
 chmod +x run_worker.sh
 echo "run_worker.sh script created and made executable."
