@@ -10,3 +10,4 @@ sudo chmod +x script.sh
 ```
 ./script.sh
 ```
+![image](https://github.com/blacknodes/OneClickNodes/assets/85839823/f815a289-4316-43ae-a450-042867ac765c)
