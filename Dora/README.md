@@ -1,5 +1,7 @@
 # Download Script
-wget 
+```
+wget "https://raw.githubusercontent.com/blacknodes/OneClickNodes/main/Dora/script.sh"
+```
 # Give Permission
 ```
 sudo chmod +x script.sh
